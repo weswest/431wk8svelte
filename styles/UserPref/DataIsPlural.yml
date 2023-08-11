@@ -1,9 +1,0 @@
-extends: existence
-message: "'data' should be treated as a plural noun based on user preference."
-level: error
-nonword: true
-tokens:
-  - data is
-  - data was
-  - data has
-  - data does not

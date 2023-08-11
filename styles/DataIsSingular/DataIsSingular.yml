@@ -1,0 +1,14 @@
+extends: existence
+message: "'%s' is incorrect. 'data' should be singular."
+level: error
+tokens:
+  - 'data are'
+  - 'data were'
+  - 'data have'
+  - 'data themselves'
+  - 'data do'
+  - \bdata\s+(?!is|as|.*s\b)(\w+)\b
+
+
+
+

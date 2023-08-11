@@ -1,0 +1,13 @@
+extends: existence
+message: "'%s' is incorrect. 'data' should be plural."
+level: error
+tokens:
+  - 'data is'
+  - 'data was'
+  - 'data has'
+  - 'data itself'
+  - 'data does'
+  - \bdata\s+(?!is|as)(\w+s)\b
+
+
+

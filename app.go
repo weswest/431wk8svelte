@@ -67,7 +67,7 @@ func (a *App) CheckWithValeTemp(inputText string) (string, error) {
 	return outputStr, nil
 }
 
-func (a *App) CheckWithVale(inputText string) (string, error) {
+func (a *App) CheckWithVale(inputText, ruleIs string) (string, error) {
 	// Create a temporary file
 	tmpFile, err := os.CreateTemp("", "vale-*.txt")
 	if err != nil {
@@ -82,8 +82,23 @@ func (a *App) CheckWithVale(inputText string) (string, error) {
 	}
 	tmpFile.Close()
 
+	// Base command arguments
+	cmdArgs := []string{tmpFile.Name()}
+
+	// Determine the appropriate command arguments based on ruleIs
+	switch ruleIs {
+	case "singular":
+		cmdArgs = append(cmdArgs, "--config=styles/DataIsSingular/.vale.ini")
+	case "plural":
+		cmdArgs = append(cmdArgs, "--config=styles/DataIsPlural/.vale.ini")
+	case "all":
+		cmdArgs = append(cmdArgs, "--config=.vale.ini")
+	default:
+		return "", fmt.Errorf("Invalid ruleIs value: %s", ruleIs)
+	}
+
 	// Create the command.
-	cmd := exec.Command("vale", tmpFile.Name())
+	cmd := exec.Command("vale", cmdArgs...)
 
 	// Run the command and capture the output
 	output, err := cmd.CombinedOutput()
@@ -134,21 +149,22 @@ func trimText(text string) string {
 func processSegment(segment string) string {
 	testLines := strings.Split(segment, "\n")
 
-	var area, level, rule, description string
+	//var area, level, rule, description string
+	var area, level, description string
 
 	for i, line := range testLines {
 		trimmedTokens := strings.Split(trimText(line), " ")
 		if i == 0 {
 			area = trimmedTokens[0]
 			level = stripANSI(trimmedTokens[1])
-			rule = trimmedTokens[len(trimmedTokens)-1]
+			//			rule = trimmedTokens[len(trimmedTokens)-1]
 			description = strings.Join(trimmedTokens[2:len(trimmedTokens)-1], " ")
 		} else {
 			description += " " + strings.Join(trimmedTokens, " ")
 		}
 	}
-
-	return fmt.Sprintf("(%s) %s:%s. %s", area, level, rule, description)
+	//	return fmt.Sprintf("(%s) %s:%s. %s", area, level, rule, description)
+	return fmt.Sprintf("(%s) %s: %s", area, level, description)
 }
 
 func extractSegments(output []byte) []string {
