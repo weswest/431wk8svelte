@@ -1,4 +1,4 @@
-module changeme
+module github.com/weswest/431wk8svelte
 
 go 1.18
 

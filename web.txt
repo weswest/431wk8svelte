@@ -1,0 +1,96 @@
+ntro
+In the past building, a desktop app required you to learn a completely different tech stack. However, if you're a GoLang enthusiast, then you're in luck. In the many frameworks written, there's Wails v2. Which has been designed to let users stick with GoLang and their JavaScript (JS) framework choice to build a fully cross-platform desktop application.
+
+Wails works similarly to Electron if you're familiar with it. If not, here's the gist: you can build a desktop app without learning anything other than JS, HTML, and CSS.
+
+However, Wails has the added advantage of requiring less computer memory to run and a smaller final file size-- thanks to GoLang. GoLang is the Backend language for processing, and JS is used to pass the data.
+
+I first encountered Wails v1 in a hackathon. I had a lot of fun building a DevOps GitHub Admin Desktop App for doing things such as bulk user removal, bulk branch protections, and more. The project was taking an existing CLI and giving it a GUI. Much like what we will be doing in this article with FreeResumeScanner.com, a single-page web application powered by a lambda for the backend,which is sort of like a CLI.
+
+However, today I will be using Wails v2, which only recently has been released, so it's partly to explore the changes between v1 and v2.
+
+TL;DR
+Final Project Source Code
+
+I. Installing Wails 2.0
+Installation Instructions for all OS
+For those coding along on MacOS
+
+Make sure you have Xcode command line tools Xcode-select --install
+
+I.a Now go install wails cli
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+I.b Check that wails cli is working
+Run wails doctor, which should output the following if everything went smoothly.
+Wails CLI v2.0.0-rc.1.1
+
+Scanning system - Please wait (this may take a long time)...Done.
+
+System
+------
+OS:             MacOS
+Version:        12.4
+ID:             21F79
+Go Version:     go1.19.1
+Platform:       darwin
+Architecture:   arm64
+
+Wails
+------
+Version:        v2.0.0-rc.1.1
+
+Dependency                      Package Name    Status          Version
+----------                      ------------    ------          -------
+xcode command line tools        N/A             Installed       2395
+npm                             N/A             Installed       8.4.0
+*upx                            N/A             Available       
+*nsis                           N/A             Available       
+
+* - Optional Dependency
+
+Diagnosis
+---------
+Your system is ready for Wails development!
+Optional package(s) installation details: 
+  - upx : Available at https://upx.github.io/
+  - nsis : Available at https://nsis.sourceforge.io/Download
+
+
+
+If Wails is useful to you or your company, please consider sponsoring the project:
+https://github.com/sponsors/leaanthony
+
+Alright, we've made it to our first break. Congrats on getting Wails working on your Operating System of choice. Go have a walking break or a snack.
+
+II. Generating FreeResumeScannerDesktop project
+Source Code: Free Resume Scanner Desktop
+I am choosing to use Svelte for this project because I find it a simple and relatively light programming language. The basic paradigm of Svelte is that it compiles plain vanilla JS, and then the code calls it as needed. This helps reduce the final project size and keep things simple compared to using React.js for this project. Although React is excellent, once you know it it can take considerable time and effort to get productive. You could also use plain JS, which is also simpler than React.
+
+NB I'd been meaning to try out Svelte for some time, and this seemed like an easy enough project to do so with.
+
+II.a Generate Project Layout
+Wails has an excellent CLI tool that makes working with the framework a breeze. Here's how easy it is to get started with our Svelte-based project:
+
+wails init -n FreeResumeDesktop -t svelte
+
+Which will lay down this directory structure for the project:
+.
+├── build/
+│   ├── appicon.png
+│   ├── darwin/
+│   └── windows/
+├── frontend/
+├── go.mod
+├── go.sum
+├── main.go
+├── app.go
+└── wails.json
+II.b Testing the plumbing
+Whenever a project is generated, it will always be the same demo project. So let's test that it works by building the project and then dot slashing the binary.
+
+First, build the binary:
+wails build
+Which will do all the heavy work of gluing together GoLang and JS by converting the code to JS functions that target the GoLang binary. And place the files in their targeted directories. For MacOs, the directory is build/bin/<your-app-name>.app/Contents/MacOs/<your-app-name>
+
+To run it on MacOS type the following:
+./build/bin/FreeResumeScannerDesktop.app/Contents/MacOS/FreeResumeScannerDesktop

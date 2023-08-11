@@ -1,0 +1,6 @@
+extends: existence
+message: "'data' should be treated as a singular noun based on user preference."
+level: error
+nonword: true
+tokens:
+  - datas
