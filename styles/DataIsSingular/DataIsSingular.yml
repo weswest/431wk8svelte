@@ -7,7 +7,6 @@ tokens:
   - 'data have'
   - 'data themselves'
   - 'data do'
-  - \bdata\s+(?!is|as|.*s\b)(\w+)\b
 
 
 
