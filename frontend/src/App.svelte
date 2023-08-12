@@ -2,6 +2,7 @@
   import {Greet} from '../wailsjs/go/main/App.js'
   import {TestVale} from '../wailsjs/go/main/App.js'
   import {CheckWithVale} from '../wailsjs/go/main/App.js'
+  import heroImage from './assets/images/hero-image.png'
 
   let inputText = "";
   let outputText = "";
@@ -55,6 +56,13 @@ To earn our ever-growing trust.`;
   function loadFile(event) {
     const file = event.target.files[0];
     if (file) {
+        // Check the file extension
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        if (fileExtension !== 'txt' && fileExtension !== 'md') {
+            inputText = "Only .txt and .md files supported";
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
             if (typeof e.target.result === 'string') {
@@ -67,6 +75,7 @@ To earn our ever-growing trust.`;
     }
 }
 
+
 </script>
 
 <style>
@@ -75,6 +84,18 @@ To earn our ever-growing trust.`;
       display: flex;
       flex-direction: column;
       align-items: center;
+  }
+
+  .header-section {
+    display: flex;
+    align-items: center; 
+    gap: 20px; 
+}
+
+
+  .hero-image {
+    max-width: 200px; 
+    margin-right: 20px;
   }
 
   .input-section {
@@ -113,34 +134,40 @@ To earn our ever-growing trust.`;
 </style>
 
 <div class="container">
-  <div>
-      <h2>Assignment:</h2>
-      <p>
-        Create a program using Wails, Svelte, and Vale that allows users to enter text and receive feedback on their grammar. As a test case, focus is on whether "data" should be plural or singular.
-      <h2>How to Use</h2>
-      <p>
-        Enter text and click evaluate. The only rules turned on are the data singular / plural, as defined by the radio boxes below. Please see the bottom for the specific rules that are captured.  Note that these rules are hard-coded: with more time we can add more sophistication.
-      </p>
-      <p>
-        If you want some sample text to get you started, please click the samples on the right.
-      </p>
+  <div class="header-section">
+      <img src={heroImage} alt="Hero Image" class="hero-image" />
+      <div>
+          <h2>Assignment:</h2>
+          <p>
+              Create a program using Wails, Svelte, and Vale that allows users to enter text and receive feedback on their grammar. As a test case, focus is on whether "data" should be plural or singular.
+          </p>
+          <h2>How to Use</h2>
+          <p>
+              Enter text and click evaluate. The only rules turned on are the data singular / plural, as defined by the radio boxes below. Please see the bottom for the specific rules that are captured. Note that these rules are hard-coded: with more time we can add more sophistication.
+          </p>
+          <p>
+              If you want some sample text to get you started, please click the samples on the right.
+          </p>
+      </div>
+  </div>
+  <div class="radio-section">
       <label>
-        <input type="radio" bind:group={dataIs} value="singular">
-        'Data' is Singular
+          <input type="radio" bind:group={dataIs} value="singular">
+          'Data' is Singular
       </label>
       <label>
-        <input type="radio" bind:group={dataIs} value="plural" checked>
-        'Data' is Plural
+          <input type="radio" bind:group={dataIs} value="plural" checked>
+          'Data' is Plural
       </label>
       <label>
-        <input type="radio" bind:group={dataIs} value="all">
-        Produce All Warnings
+          <input type="radio" bind:group={dataIs} value="all">
+          Produce All Warnings
       </label>
   </div>
   <div>
       <button>
-        <input type="file" id="fileInput" on:change={loadFile} accept=".txt,.md" style="width: 100%;">
-        Read in .txt or .md
+          <input type="file" id="fileInput" on:change={loadFile} accept=".txt,.md" style="width: 100%;">
+          Read in .txt or .md
       </button>
   </div>
   <div class="input-section">
@@ -148,7 +175,6 @@ To earn our ever-growing trust.`;
       <div class="sample-buttons">
           <button on:click={() => loadSample(sample1)}>Sample 1</button>
           <button on:click={() => loadSample(sample2)}>Sample 2</button>
-
       </div>
   </div>
   <button on:click={evaluateText}>Evaluate</button>
