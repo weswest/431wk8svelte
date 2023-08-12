@@ -51,6 +51,22 @@ To earn our ever-growing trust.`;
   function loadSample(sample) {
     inputText = sample;
   }
+
+  function loadFile(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (typeof e.target.result === 'string') {
+                inputText = e.target.result;
+            } else {
+                inputText = "File's text not found";
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
 </script>
 
 <style>
@@ -100,14 +116,10 @@ To earn our ever-growing trust.`;
   <div>
       <h2>Assignment:</h2>
       <p>
-        Take on the role of the company's data engineers in building a product prototype. It should be a desktop application that can be distributed as a single executable load module for Windows 10/11, Apple Mac, or Linux computers. It should be capable of reading a plain text file of at least 200 words and checking for spelling and grammatical errors. But, more importantly, it should be customizable, with the ability to adapt to the writing style of each individual user/writer.
-      </p>
-      <p>
-        To demonstrate the ability to conform to the styles of individual writers, the application should ask users whether they want to treat "data" as a singular or plural noun. (Note that proper English has "data" as a plural noun. The singular of "data" is "datum."). When presented with a document in which the word "data" is used incorrectly (as defined by user preference), the sentence containing the word should be flagged as erroneous.
-      </p>
+        Create a program using Wails, Svelte, and Vale that allows users to enter text and receive feedback on their grammar. As a test case, focus is on whether "data" should be plural or singular.
       <h2>How to Use</h2>
       <p>
-        Enter text and click evaluate. The only rules turned on are the data singular / plural, as defined by the radio boxes below. Please see the bottom for the specific rules that are captured.
+        Enter text and click evaluate. The only rules turned on are the data singular / plural, as defined by the radio boxes below. Please see the bottom for the specific rules that are captured.  Note that these rules are hard-coded: with more time we can add more sophistication.
       </p>
       <p>
         If you want some sample text to get you started, please click the samples on the right.
@@ -125,11 +137,18 @@ To earn our ever-growing trust.`;
         Produce All Warnings
       </label>
   </div>
+  <div>
+      <button>
+        <input type="file" id="fileInput" on:change={loadFile} accept=".txt,.md" style="width: 100%;">
+        Read in .txt or .md
+      </button>
+  </div>
   <div class="input-section">
       <textarea bind:value={inputText} placeholder="Enter your text here..."></textarea>
       <div class="sample-buttons">
           <button on:click={() => loadSample(sample1)}>Sample 1</button>
           <button on:click={() => loadSample(sample2)}>Sample 2</button>
+
       </div>
   </div>
   <button on:click={evaluateText}>Evaluate</button>
