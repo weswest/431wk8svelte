@@ -42,14 +42,14 @@ With power, data itself does hold.
 In the end, data does what it must,
 To earn our ever-growing trust.`; 
 
-  function evaluateText() {
+  function evaluateTextPartial() {
     console.log("evaluateText function called with input:", inputText);
     CheckWithValePartial(inputText, dataIs).then(result => {
         console.log("Received result from backend:", result);
         outputText = result;
     });
   }
-  function evaluateTextFull() {
+  function evaluateText() {
     console.log("evaluateText function called with input:", inputText);
     CheckWithVale(inputText, dataIs).then(result => {
         console.log("Received result from backend:", result);

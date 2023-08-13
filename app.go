@@ -3,14 +3,11 @@ package main
 import (
 	"context"
 	_ "embed"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -81,33 +78,13 @@ func (a *App) CheckWithValePartial(inputText, ruleIs string) (string, error) {
 		return "", fmt.Errorf("Invalid ruleIs value: %s", ruleIs)
 	}
 
-	// Get the binary path and handle any errors
-	binaryPath, err := getValeBinaryPath()
-	if err != nil {
-		return "Errored out at binaryPath", err
-	}
+	// Hard reference the path to the Vale executable
+	valePath := "/usr/local/bin/vale"
 
-	// Write the embedded binary to disk
-	var binaryData []byte
-	switch {
-	case runtime.GOOS == "darwin" && runtime.GOARCH == "amd64":
-		binaryData = mac64bitBinary
-	case runtime.GOOS == "darwin" && runtime.GOARCH == "arm64":
-		binaryData = macArm64Binary
-	case runtime.GOOS == "windows" && runtime.GOARCH == "amd64":
-		binaryData = win64bitBinary
-	case runtime.GOOS == "windows" && runtime.GOARCH == "arm64":
-		binaryData = winArm64Binary
-	default:
-		return "Unspped platform", errors.New("Unsupported platform")
-	}
-	err = writeBinaryToDisk(binaryData, binaryPath)
-	if err != nil {
-		return "Failed to write binary to disk", err
-	}
+	return fmt.Sprintf("Executing command: %s %v", valePath, cmdArgs), nil
 
 	// Create the command
-	cmd := exec.Command(binaryPath, cmdArgs...)
+	cmd := exec.Command(valePath, cmdArgs...)
 
 	// Run the command and capture the output
 	output, err := cmd.CombinedOutput()
@@ -275,34 +252,4 @@ func extractSegments(output []byte) []string {
 	}
 
 	return segments
-}
-
-func getValeBinaryPath() (string, error) {
-	platform := runtime.GOOS
-	arch := runtime.GOARCH
-	binaryName := "vale"
-	if platform == "windows" {
-		binaryName = "vale.exe"
-	}
-
-	// Determine the directory based on the platform and architecture
-	var dir string
-	switch {
-	case platform == "darwin" && arch == "amd64":
-		dir = "mac_64bit"
-	case platform == "darwin" && arch == "arm64":
-		dir = "mac_arm64"
-	case platform == "windows" && arch == "amd64":
-		dir = "win_64bit"
-	case platform == "windows" && arch == "arm64":
-		dir = "win_arm64"
-	default:
-		return "", errors.New("Program currently works for mac and windows 64-bit and arm64 architectures. If you have vale installed locally this program can run in dev mode.")
-	}
-
-	return filepath.Join("binaries", dir, binaryName), nil
-}
-
-func writeBinaryToDisk(binaryData []byte, outputPath string) error {
-	return os.WriteFile(outputPath, binaryData, 0755)
 }
