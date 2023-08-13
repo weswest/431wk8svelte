@@ -1,8 +1,5 @@
 <script>
-  import {Greet} from '../wailsjs/go/main/App.js'
-  import {TestVale} from '../wailsjs/go/main/App.js'
   import {CheckWithVale} from '../wailsjs/go/main/App.js'
-  import {CheckWithValePartial} from '../wailsjs/go/main/App.js'
   import heroImage from './assets/images/hero-image.png'
 
   let inputText = "";
@@ -42,13 +39,6 @@ With power, data itself does hold.
 In the end, data does what it must,
 To earn our ever-growing trust.`; 
 
-  function evaluateTextPartial() {
-    console.log("evaluateText function called with input:", inputText);
-    CheckWithValePartial(inputText, dataIs).then(result => {
-        console.log("Received result from backend:", result);
-        outputText = result;
-    });
-  }
   function evaluateText() {
     console.log("evaluateText function called with input:", inputText);
     CheckWithVale(inputText, dataIs).then(result => {

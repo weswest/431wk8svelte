@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -10,18 +9,6 @@ import (
 	"regexp"
 	"strings"
 )
-
-//go:embed binaries/mac_64bit/vale
-var mac64bitBinary []byte
-
-//go:embed binaries/mac_arm64/vale
-var macArm64Binary []byte
-
-//go:embed binaries/win_64bit/vale.exe
-var win64bitBinary []byte
-
-//go:embed binaries/win_arm64/vale.exe
-var winArm64Binary []byte
 
 // App struct
 type App struct {
@@ -47,71 +34,6 @@ func (a *App) Greet(name string) string {
 func (a *App) TestVale(text string) (string, error) {
 	fmt.Println("TestVale function called with input:", text)
 	return "TestVale Call", nil
-}
-
-func (a *App) CheckWithValePartial(inputText, ruleIs string) (string, error) {
-	tmpFile, err := os.CreateTemp("", "vale-*.txt")
-	if err != nil {
-		log.Fatalf("Failed to create temp file: %s", err)
-	}
-	defer os.Remove(tmpFile.Name()) // clean up
-
-	// Write the content to the temporary file
-	_, err = tmpFile.Write([]byte(inputText))
-	if err != nil {
-		log.Fatalf("Failed to write to temp file: %s", err)
-	}
-	tmpFile.Close()
-
-	// Base command arguments
-	cmdArgs := []string{tmpFile.Name()}
-
-	// Determine the appropriate command arguments based on ruleIs
-	switch ruleIs {
-	case "singular":
-		cmdArgs = append(cmdArgs, "--config=styles/DataIsSingular/.vale.ini")
-	case "plural":
-		cmdArgs = append(cmdArgs, "--config=styles/DataIsPlural/.vale.ini")
-	case "all":
-		cmdArgs = append(cmdArgs, "--config=.vale.ini")
-	default:
-		return "", fmt.Errorf("Invalid ruleIs value: %s", ruleIs)
-	}
-
-	// Hard reference the path to the Vale executable
-	valePath := "/usr/local/bin/vale"
-
-	return fmt.Sprintf("Executing command: %s %v", valePath, cmdArgs), nil
-
-	// Create the command
-	cmd := exec.Command(valePath, cmdArgs...)
-
-	// Run the command and capture the output
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			exitStatus := exitError.ExitCode()
-			if exitStatus == 1 {
-				// Vale found issues, log them without stopping the program.
-				log.Println("Vale found issues.  See below.")
-			} else {
-				// Handle other non-zero exit statuses.
-				log.Println("Command failed with non-content error:", exitStatus)
-				return fmt.Sprint(exitStatus), nil
-			}
-		} else {
-			// Handle other types of errors.
-			log.Println("Failed to run command:", err)
-			thing := fmt.Sprintf("Oops %s", err)
-			return thing, nil
-		}
-	}
-
-	if len(output) == 0 {
-		return "Neener", nil
-	}
-
-	return "Cmd Run and Output Created", nil
 }
 
 func (a *App) CheckWithVale(inputText, ruleIs string) (string, error) {
@@ -158,11 +80,20 @@ func (a *App) CheckWithVale(inputText, ruleIs string) (string, error) {
 				log.Println("Vale found issues.  See below.")
 			} else {
 				// Handle other non-zero exit statuses.
-				log.Fatalf("Command failed with non-content error:", exitStatus)
+				log.Println("Command failed with non-content error:", exitStatus)
+				return fmt.Sprint(exitStatus), nil
 			}
 		} else {
 			// Handle other types of errors.
-			log.Fatalf("Failed to run command:", err)
+			log.Println("Failed to run command:", err)
+			meaCulpa := fmt.Sprintf(`Oops %s
+			This code works in the wails dev environment but not in the wails prod environment.
+			The reason for this is that wails dev has access to the vale command line tool whereas wails build doesn't.
+			See the video that goes along with this submission for further details.
+			As explained in this project's readme, I attempted six totally different approaches to get the wails build to run the vale linter, to no avail.
+			I'd already spend 15 hours getting to the point where wails dev worked and wails build failed; I spent another 12 trying - and failing - to debug this issue.
+			Please accept this incomplete submission.`, err)
+			return meaCulpa, nil
 		}
 	}
 
