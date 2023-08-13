@@ -1,1 +1,0 @@
-# Section about the MacBook pro ultimate edition

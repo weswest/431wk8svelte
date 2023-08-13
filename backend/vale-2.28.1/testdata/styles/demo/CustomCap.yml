@@ -1,9 +1,0 @@
-extends: capitalization
-message: "'%s' should be in title case"
-level: error
-scope: heading
-match: $sentence
-threshold: 0.9
-exceptions:
-  - ABC
-  - add

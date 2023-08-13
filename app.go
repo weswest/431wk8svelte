@@ -2,19 +2,29 @@ package main
 
 import (
 	"context"
+	_ "embed"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
-
-
-	"github.com/weswest/431wk8svelte/backend/vale-2.28.1/internal/core"
-	"github.com/weswest/431wk8svelte/backend/vale-2.28.1/internal/lint"
-	)
-	
 )
+
+//go:embed binaries/mac_64bit/vale
+var mac64bitBinary []byte
+
+//go:embed binaries/mac_arm64/vale
+var macArm64Binary []byte
+
+//go:embed binaries/win_64bit/vale.exe
+var win64bitBinary []byte
+
+//go:embed binaries/win_arm64/vale.exe
+var winArm64Binary []byte
 
 // App struct
 type App struct {
@@ -71,8 +81,33 @@ func (a *App) CheckWithValePartial(inputText, ruleIs string) (string, error) {
 		return "", fmt.Errorf("Invalid ruleIs value: %s", ruleIs)
 	}
 
-	// Create the command.
-	cmd := exec.Command("vale", cmdArgs...)
+	// Get the binary path and handle any errors
+	binaryPath, err := getValeBinaryPath()
+	if err != nil {
+		return "Errored out at binaryPath", err
+	}
+
+	// Write the embedded binary to disk
+	var binaryData []byte
+	switch {
+	case runtime.GOOS == "darwin" && runtime.GOARCH == "amd64":
+		binaryData = mac64bitBinary
+	case runtime.GOOS == "darwin" && runtime.GOARCH == "arm64":
+		binaryData = macArm64Binary
+	case runtime.GOOS == "windows" && runtime.GOARCH == "amd64":
+		binaryData = win64bitBinary
+	case runtime.GOOS == "windows" && runtime.GOARCH == "arm64":
+		binaryData = winArm64Binary
+	default:
+		return "Unspped platform", errors.New("Unsupported platform")
+	}
+	err = writeBinaryToDisk(binaryData, binaryPath)
+	if err != nil {
+		return "Failed to write binary to disk", err
+	}
+
+	// Create the command
+	cmd := exec.Command(binaryPath, cmdArgs...)
 
 	// Run the command and capture the output
 	output, err := cmd.CombinedOutput()
@@ -85,12 +120,12 @@ func (a *App) CheckWithValePartial(inputText, ruleIs string) (string, error) {
 			} else {
 				// Handle other non-zero exit statuses.
 				log.Println("Command failed with non-content error:", exitStatus)
-				return string(exitStatus), nil
+				return fmt.Sprint(exitStatus), nil
 			}
 		} else {
 			// Handle other types of errors.
 			log.Println("Failed to run command:", err)
-			thing := fmt.Sprintf("%s", err)
+			thing := fmt.Sprintf("Oops %s", err)
 			return thing, nil
 		}
 	}
@@ -240,4 +275,34 @@ func extractSegments(output []byte) []string {
 	}
 
 	return segments
+}
+
+func getValeBinaryPath() (string, error) {
+	platform := runtime.GOOS
+	arch := runtime.GOARCH
+	binaryName := "vale"
+	if platform == "windows" {
+		binaryName = "vale.exe"
+	}
+
+	// Determine the directory based on the platform and architecture
+	var dir string
+	switch {
+	case platform == "darwin" && arch == "amd64":
+		dir = "mac_64bit"
+	case platform == "darwin" && arch == "arm64":
+		dir = "mac_arm64"
+	case platform == "windows" && arch == "amd64":
+		dir = "win_64bit"
+	case platform == "windows" && arch == "arm64":
+		dir = "win_arm64"
+	default:
+		return "", errors.New("Program currently works for mac and windows 64-bit and arm64 architectures. If you have vale installed locally this program can run in dev mode.")
+	}
+
+	return filepath.Join("binaries", dir, binaryName), nil
+}
+
+func writeBinaryToDisk(binaryData []byte, outputPath string) error {
+	return os.WriteFile(outputPath, binaryData, 0755)
 }
