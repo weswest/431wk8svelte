@@ -6,8 +6,8 @@ export function CheckWithVale(arg1, arg2) {
   return window['go']['main']['App']['CheckWithVale'](arg1, arg2);
 }
 
-export function CheckWithValeTemp(arg1) {
-  return window['go']['main']['App']['CheckWithValeTemp'](arg1);
+export function CheckWithValePartial(arg1, arg2) {
+  return window['go']['main']['App']['CheckWithValePartial'](arg1, arg2);
 }
 
 export function Greet(arg1) {

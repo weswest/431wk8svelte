@@ -8,6 +8,12 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+
+	"github.com/weswest/431wk8svelte/backend/vale-2.28.1/internal/core"
+	"github.com/weswest/431wk8svelte/backend/vale-2.28.1/internal/lint"
+	)
+	
 )
 
 // App struct
@@ -36,9 +42,7 @@ func (a *App) TestVale(text string) (string, error) {
 	return "TestVale Call", nil
 }
 
-func (a *App) CheckWithValeTemp(inputText string) (string, error) {
-
-	// Create a temporary file
+func (a *App) CheckWithValePartial(inputText, ruleIs string) (string, error) {
 	tmpFile, err := os.CreateTemp("", "vale-*.txt")
 	if err != nil {
 		log.Fatalf("Failed to create temp file: %s", err)
@@ -52,22 +56,54 @@ func (a *App) CheckWithValeTemp(inputText string) (string, error) {
 	}
 	tmpFile.Close()
 
+	// Base command arguments
+	cmdArgs := []string{tmpFile.Name()}
+
+	// Determine the appropriate command arguments based on ruleIs
+	switch ruleIs {
+	case "singular":
+		cmdArgs = append(cmdArgs, "--config=styles/DataIsSingular/.vale.ini")
+	case "plural":
+		cmdArgs = append(cmdArgs, "--config=styles/DataIsPlural/.vale.ini")
+	case "all":
+		cmdArgs = append(cmdArgs, "--config=.vale.ini")
+	default:
+		return "", fmt.Errorf("Invalid ruleIs value: %s", ruleIs)
+	}
+
 	// Create the command.
-	cmd := exec.Command("vale", tmpFile.Name())
+	cmd := exec.Command("vale", cmdArgs...)
 
 	// Run the command and capture the output
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("oops!")
+		if exitError, ok := err.(*exec.ExitError); ok {
+			exitStatus := exitError.ExitCode()
+			if exitStatus == 1 {
+				// Vale found issues, log them without stopping the program.
+				log.Println("Vale found issues.  See below.")
+			} else {
+				// Handle other non-zero exit statuses.
+				log.Println("Command failed with non-content error:", exitStatus)
+				return string(exitStatus), nil
+			}
+		} else {
+			// Handle other types of errors.
+			log.Println("Failed to run command:", err)
+			thing := fmt.Sprintf("%s", err)
+			return thing, nil
+		}
 	}
-	outputStr := string(output)
-	if outputStr == "" {
-		outputStr = "You are perfect just the way you are"
+
+	if len(output) == 0 {
+		return "Neener", nil
 	}
-	return outputStr, nil
+
+	return "Cmd Run and Output Created", nil
 }
 
 func (a *App) CheckWithVale(inputText, ruleIs string) (string, error) {
+
 	// Create a temporary file
 	tmpFile, err := os.CreateTemp("", "vale-*.txt")
 	if err != nil {
