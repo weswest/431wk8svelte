@@ -1,6 +1,6 @@
 # Overview of Project
 
-This is an assignment for Week 7 in the Northwestern Masters in Data Science [MSDS-431 Data Engineering with Go](https://msdsgo.netlify.app/data-engineering-with-go/) course.
+This is an assignment for Week 8 in the Northwestern Masters in Data Science [MSDS-431 Data Engineering with Go](https://msdsgo.netlify.app/data-engineering-with-go/) course.
 
 The purpose of this assignment was to build a desktop application using wails, svelte, and vale that can take in text and run the vale linter on it to identify cases where "data" is incorrectly being referenced as singular or plural.
 
